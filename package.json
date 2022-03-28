@@ -79,7 +79,7 @@
     "@babel/preset-env": "7",
     "@babel/preset-typescript": "7",
     "@types/jest": "latest",
-    "@types/node": "latest",
+    "@types/node": "^17.0.21",
     "@typescript-eslint/eslint-plugin": "latest",
     "@typescript-eslint/parser": "latest",
     "arkit": "1",

@@ -126,6 +126,10 @@ const getTokenString = (
   format: string,
   dataType?: string
 ) => {
+	// console.log("[getTokenString] file=",file);
+	// console.log("[getTokenString] name=",name);
+	// console.log("[getTokenString] format=",format);
+	// console.log("[getTokenString] dataType=",dataType);
   if (format === 'json') return `${JSON.stringify(file, null, ' ')}`;
 
   const EXPORT = format === 'js' ? `module.exports = ${name}` : `export default ${name}`;

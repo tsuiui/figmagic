@@ -62,6 +62,7 @@ export declare const ErrorMakeBorderWidthTokensNoFrame: string;
 export declare const ErrorMakeColorTokensNoChildren: string;
 export declare const ErrorMakeColorTokensNoFrame: string;
 export declare const ErrorMakeDelayTokensMissingProps: string;
+export declare const ErrorMakeColorTokensNoPrimitive: string;
 export declare const ErrorMakeDelayTokensNoChildren: string;
 export declare const ErrorMakeDelayTokensNoFrame: string;
 export declare const ErrorMakeDurationTokensMissingProps: string;

@@ -20,12 +20,20 @@ import { makeDurationTokens } from './logic/makeDurationTokens';
 import { makeDelayTokens } from './logic/makeDelayTokens';
 import { makeEasingTokens } from './logic/makeEasingTokens';
 
+import { makeSemanticColorTokens } from './logic/makeSemanticColorTokens';
+
 import { ignoreElementsKeywords } from '../../frameworks/system/ignoreElementsKeywords';
 import { ErrorExtractTokens, ErrorExtractTokensNoConfig } from '../../frameworks/errors/errors';
+import { colors } from '../../frameworks/system/colors';
 
-export const makeToken = (token: Frame, tokenName: string, config: Config): Token =>
-  new Token(token, tokenName, config);
+export const makeToken = (token: Frame, tokenName: string, config: Config): Token => {
+	return (new Token(token, tokenName, config)).extract();
+}
 
+export const makeSemanticToken = (token: Frame, tokenName: string, config: Config, primitives: []): Token => {
+	return (new SemanticToken(token, tokenName, config, primitives)).extract();
+}
+  
 class Token {
   token: Frame;
   tokenName: string;
@@ -37,10 +45,15 @@ class Token {
     this.tokenName = tokenName;
     this.config = config;
     this.writeOperation = null;
-
-    const processedToken = this.extractTokens(this.token, this.tokenName, this.config);
-    this.setWriteOperation(processedToken, tokenName);
   }
+
+	//Runs the extraction process. Separated from constructor to allow subclasses
+	//to call super without triggering [primitive] token extractTokens.
+	public extract():Token {
+		const processedToken = this.extractTokens(this.token, this.tokenName, this.config);
+    this.setWriteOperation(processedToken, this.tokenName);
+		return this;
+	}
 
   private extractTokens(frame: Frame, tokenName: string, config: Config): ProcessedToken {
     try {
@@ -73,7 +86,7 @@ class Token {
     }
   };
 
-  private getTokens = (frame: Frame, name: string, config: Config): any => {
+  protected getTokens = (frame: Frame, name: string, config: Config): any => {
     const {
       borderWidthUnit,
       camelizeTokenNames,
@@ -134,7 +147,7 @@ class Token {
     if (tokenOperations.hasOwnProperty(name)) return tokenOperations[name]();
   };
 
-  setWriteOperation = (processedToken: ProcessedToken, tokenName: string): void => {
+  protected setWriteOperation(processedToken: ProcessedToken, tokenName: string): void {
     this.writeOperation = {
       type: 'token',
       file: processedToken,
@@ -149,4 +162,60 @@ class Token {
     if (this.writeOperation) return this.writeOperation;
     return null;
   };
+}
+
+class SemanticToken extends Token {
+	primitives:[];
+
+	constructor(token: Frame, tokenName: string, config: Config, primitives:[]) {
+		super(token,tokenName,config);
+		this.primitives = primitives;
+		//Alternative to class level to primitives is to pass primitives through 
+		//extractTokens to getTokens. Didn't seem worth it to provide an 
+		//extractTokens override just to do that.
+  }
+
+  protected getTokens = (frame: Frame, name: string, config: Config): any => {
+		const {
+      borderWidthUnit,
+      camelizeTokenNames,
+      fontUnit,
+      letterSpacingUnit,
+      lineHeightUnit,
+      opacitiesUnit,
+      outputFormatColors,
+      radiusUnit,
+      remSize,
+      shadowUnit,
+      spacingUnit,
+      unitlessPrecision,
+      usePostscriptFontNames
+    } = config;
+		
+    const tokenOperations = {
+    	semanticcolors: () => makeSemanticColorTokens(frame, outputFormatColors, 
+				this.primitives, camelizeTokenNames),
+			//TODO: Figure out how we want to handle composite styles-to-token generation
+			semantictypography: ()=>{ 
+				return { 
+					headingPageSize: "fontSizes.h1",
+					headingPageFace: "fontFamilies.bold"
+				}
+			}
+    };
+    // @ts-ignore
+    if (tokenOperations.hasOwnProperty(name)) return tokenOperations[name]();
+  };
+
+	protected setWriteOperation (processedToken: ProcessedToken, tokenName: string): void {
+		super.setWriteOperation(processedToken,tokenName);
+		//TODO: Refactor the WriteOperation type (in Write.ts) to have an 
+		//isSemanticToken property if using the WriteOperation to flag semantic 
+		//token output is the right approach
+		if (this.writeOperation!==null) {
+			//REDO THIS. description doesn't make it into GetFileDataOperation type!
+			this.writeOperation.description = "isSemanticToken";
+		}
+	};
+
 }

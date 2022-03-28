@@ -21,7 +21,8 @@ export function prepareWrite(writeOperation: WriteOperation): any {
       outputFolderTokens,
       tokensRelativeImportPrefix,
       metadata,
-      templates
+      templates,
+			description
     } = writeOperation;
 
     if ((type === 'css' || type === 'story' || type === 'component') && !templates)

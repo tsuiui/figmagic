@@ -145,6 +145,7 @@ export const ErrorMakeColorTokensNoFrame = ErrorMessage('No frame for makeColorT
 export const ErrorMakeDelayTokensMissingProps = ErrorMessage(
   'Missing "name" or "characters" properties in Delay frame!'
 );
+export const ErrorMakeColorTokensNoPrimitive = ErrorMessage("No primitive color tokens were found!");
 export const ErrorMakeDelayTokensNoChildren = ErrorMessage('Delay frame has no children!');
 export const ErrorMakeDelayTokensNoFrame = ErrorMessage('No frame for makeDelayTokens()!');
 export const ErrorMakeDurationTokensMissingProps = ErrorMessage(
