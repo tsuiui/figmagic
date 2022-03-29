@@ -23,8 +23,9 @@ import { makeEasingTokens } from './logic/makeEasingTokens';
 import { makeSemanticColorTokens } from './logic/makeSemanticColorTokens';
 
 import { ignoreElementsKeywords } from '../../frameworks/system/ignoreElementsKeywords';
-import { ErrorExtractTokens, ErrorExtractTokensNoConfig } from '../../frameworks/errors/errors';
-import { colors } from '../../frameworks/system/colors';
+import { ErrorExtractTokens, ErrorExtractTokensNoConfig, ErrorMakeColorTokensNoPrimitive } from '../../frameworks/errors/errors';
+//import { colors } from '../../frameworks/system/colors';
+
 
 export const makeToken = (token: Frame, tokenName: string, config: Config): Token => {
 	return (new Token(token, tokenName, config)).extract();
@@ -193,8 +194,18 @@ class SemanticToken extends Token {
     } = config;
 		
     const tokenOperations = {
-    	semanticcolors: () => makeSemanticColorTokens(frame, outputFormatColors, 
-				this.primitives, camelizeTokenNames),
+    	semanticcolors: () => {
+				//Get the color primitives object for the keys (i.e., token names) so we can
+				//check that the primitive referenced by the semantic token exists.
+				const colorPrimitives = this.primitives.find((tokenType:any)=>{
+					return (tokenType.name==="colors");
+				});
+				if (colorPrimitives===undefined) {
+					throw Error(ErrorMakeColorTokensNoPrimitive);
+				}
+				return makeSemanticColorTokens(frame, outputFormatColors, 
+					colorPrimitives, camelizeTokenNames);
+			},
 			//TODO: Figure out how we want to handle composite styles-to-token generation
 			semantictypography: ()=>{ 
 				return { 
@@ -207,15 +218,22 @@ class SemanticToken extends Token {
     if (tokenOperations.hasOwnProperty(name)) return tokenOperations[name]();
   };
 
-	protected setWriteOperation (processedToken: ProcessedToken, tokenName: string): void {
-		super.setWriteOperation(processedToken,tokenName);
-		//TODO: Refactor the WriteOperation type (in Write.ts) to have an 
-		//isSemanticToken property if using the WriteOperation to flag semantic 
-		//token output is the right approach
-		if (this.writeOperation!==null) {
-			//REDO THIS. description doesn't make it into GetFileDataOperation type!
-			this.writeOperation.description = "isSemanticToken";
-		}
-	};
+	// protected setWriteOperation (processedToken: ProcessedToken, tokenName: string): void {
+	// 	super.setWriteOperation(processedToken,tokenName);
+	// 	//Using metadata to carry a flag for semantic tokens so we can do file 
+	// 	//output differently in getFileContentAndPath.ts
+	// 	//Since we are already relying on a naming convention in Figma elements to
+	// 	//signify the presence of semantic tokens we carry this forward by attaching
+	// 	//this.token to the element and reading it's name in getFileContentAndPath.ts
+	// 	if (this.writeOperation!==null) {
+	// 		this.writeOperation.metadata = {
+	// 			text: this.tokenName,
+	// 			dataType: null,
+	// 			element: this.token,
+	// 			extraProps: [],
+	// 			imports: []
+	// 		}
+	// 	}
+	// };
 
 }

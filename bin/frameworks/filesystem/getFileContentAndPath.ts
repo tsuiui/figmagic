@@ -26,6 +26,7 @@ import {
   ErrorGetFileContentAndPathMissingFields,
   ErrorGetFileContentAndPathNoReturn
 } from '../errors/errors';
+import { json } from 'stream/consumers';
 
 /**
  * Orchestrator to get file content and path, before writing files
@@ -68,8 +69,14 @@ export function getFileContentAndPath(
       token: () => {
         if (metadata && metadata.dataType === 'enum')
           return { fileContent: getTokenString(file, name, format, metadata.dataType), filePath };
+
         filePath += `.${format}`;
-        return { fileContent: getTokenString(file, name, format), filePath };
+				if (name.startsWith("semantic")) {
+					return { fileContent: getSemanticTokenString(file, name, format), filePath };
+				}
+				else { //Otherwise primitive token
+					return { fileContent: getTokenString(file, name, format), filePath };
+				}
       },
       component: () => {
         if (type === 'component' && templates)
@@ -126,10 +133,6 @@ const getTokenString = (
   format: string,
   dataType?: string
 ) => {
-	// console.log("[getTokenString] file=",file);
-	// console.log("[getTokenString] name=",name);
-	// console.log("[getTokenString] format=",format);
-	// console.log("[getTokenString] dataType=",dataType);
   if (format === 'json') return `${JSON.stringify(file, null, ' ')}`;
 
   const EXPORT = format === 'js' ? `module.exports = ${name}` : `export default ${name}`;
@@ -148,6 +151,37 @@ const getTokenString = (
     ' '
   )}${CONST_ASSERTION}\n\n${EXPORT};`;
 };
+
+const getSemanticTokenString = (file: string | ProcessedToken, 
+																name: string, format: string) => {
+	const CONST_ASSERTION = format === 'ts' ? ' as const;' : '';
+	const EXPORT = format === 'js' ? `module.exports = ${name}` : `export default ${name}`;
+	//For typography there could be several imports required since the styled 
+	//element in Figma will be composed of several tokens.
+	let output:string = "";
+	let importStatements:string[]=[];
+	switch (name) {
+		case "semanticColors": 
+			importStatements.push("import colors from './colors';\n");
+			break;
+		case "semanticTypography":
+			importStatements.push("import typography from './typography';\n");
+			break;
+	}
+	output+=`// ${MsgGeneratedFileWarning}\n\n`;
+	importStatements.forEach((statement)=>output+=statement);
+	let jsonObj:string = JSON.stringify(file,null,' ');
+
+	//Strip surrounding quotes from property values to arrive at variable
+	//references for the property
+	const matches = jsonObj.match(/:\s"\S*"/gm);
+	matches?.forEach((m)=>{
+		const repl = ": "+m.substring(3,m.length-1);
+		jsonObj = jsonObj.replace(m,repl);
+	});
+	output+=`\nconst ${name} = ${jsonObj}${CONST_ASSERTION}\n\n${EXPORT};`;
+	return output;
+}
 
 /**
  * @description Validate whether required fields exist on GetFileDataOperation type
