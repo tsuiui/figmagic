@@ -14,7 +14,7 @@ declare class Token {
     private extractTokens;
     private getChildren;
     protected getTokens: (frame: Frame, name: string, config: Config) => any;
-    protected setWriteOperation(processedToken: ProcessedToken, tokenName: string): void;
+    setWriteOperation: (processedToken: ProcessedToken, tokenName: string) => void;
     getWriteOperation: () => WriteOperation | null;
 }
 export {};

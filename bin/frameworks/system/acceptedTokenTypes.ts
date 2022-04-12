@@ -12,10 +12,10 @@ export const acceptedTokenTypes: string[] = [
   'letterspacings',
   'lineheights',
   'mediaqueries',
+	'mspacing',
   'opacities',
   'radii',
   'shadows',
   'spacing',
-  'spacings',
   'zindices'
 ];

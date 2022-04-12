@@ -23,6 +23,7 @@ export async function createTokens(config: Config, data: FigmaData): Promise<voi
     const { outputFolderTokens } = config;
     refresh(outputFolderTokens);
     const tokensPage: Frame[] = createPage(data.document.children, 'Design Tokens');
+		
 		//processed primitive tokens
     const processedTokens = processTokens(tokensPage, config);
 		//Write primitive tokens

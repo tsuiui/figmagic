@@ -21,10 +21,10 @@ import { makeDelayTokens } from './logic/makeDelayTokens';
 import { makeEasingTokens } from './logic/makeEasingTokens';
 
 import { makeSemanticColorTokens } from './logic/makeSemanticColorTokens';
+import { makeSemanticFontTokens } from './logic/makeSemanticFontTokens';
 
 import { ignoreElementsKeywords } from '../../frameworks/system/ignoreElementsKeywords';
 import { ErrorExtractTokens, ErrorExtractTokensNoConfig, ErrorMakeColorTokensNoPrimitive } from '../../frameworks/errors/errors';
-//import { colors } from '../../frameworks/system/colors';
 
 
 export const makeToken = (token: Frame, tokenName: string, config: Config): Token => {
@@ -59,7 +59,7 @@ class Token {
   private extractTokens(frame: Frame, tokenName: string, config: Config): ProcessedToken {
     try {
       if (!frame || !tokenName) throw Error(ErrorExtractTokens);
-
+			
       frame.children = this.getChildren(frame);
       return this.getTokens(frame, tokenName.toLowerCase(), config);
     } catch (error: any) {
@@ -137,7 +137,7 @@ class Token {
         if (!config) throw Error(ErrorExtractTokensNoConfig);
         return makeSpacingTokens(frame, spacingUnit, remSize, camelizeTokenNames);
       },
-      spacings: () => {
+      mspacing: () => {
         if (!config) throw Error(ErrorExtractTokensNoConfig);
         return makeSpacingTokens(frame, spacingUnit, remSize, camelizeTokenNames);
       },
@@ -148,7 +148,7 @@ class Token {
     if (tokenOperations.hasOwnProperty(name)) return tokenOperations[name]();
   };
 
-  protected setWriteOperation(processedToken: ProcessedToken, tokenName: string): void {
+  setWriteOperation = (processedToken: ProcessedToken, tokenName: string):void => {
     this.writeOperation = {
       type: 'token',
       file: processedToken,
@@ -207,7 +207,9 @@ class SemanticToken extends Token {
 					colorPrimitives, camelizeTokenNames);
 			},
 			//TODO: Figure out how we want to handle composite styles-to-token generation
-			semantictypography: ()=>{ 
+			semantictypography: ()=>{
+				//console.log("[tokenOperations]",this.primitives);
+				//return makeSemanticFontTokens(frame);
 				return { 
 					headingPageSize: "fontSizes.h1",
 					headingPageFace: "fontFamilies.bold"
@@ -217,23 +219,4 @@ class SemanticToken extends Token {
     // @ts-ignore
     if (tokenOperations.hasOwnProperty(name)) return tokenOperations[name]();
   };
-
-	// protected setWriteOperation (processedToken: ProcessedToken, tokenName: string): void {
-	// 	super.setWriteOperation(processedToken,tokenName);
-	// 	//Using metadata to carry a flag for semantic tokens so we can do file 
-	// 	//output differently in getFileContentAndPath.ts
-	// 	//Since we are already relying on a naming convention in Figma elements to
-	// 	//signify the presence of semantic tokens we carry this forward by attaching
-	// 	//this.token to the element and reading it's name in getFileContentAndPath.ts
-	// 	if (this.writeOperation!==null) {
-	// 		this.writeOperation.metadata = {
-	// 			text: this.tokenName,
-	// 			dataType: null,
-	// 			element: this.token,
-	// 			extraProps: [],
-	// 			imports: []
-	// 		}
-	// 	}
-	// };
-
 }
