@@ -42,7 +42,6 @@ function makeColorToken(
   if (!item.fills || item.fills.length === 0) return null;
 
   const NAME = sanitizeString(item.name, camelizeTokenNames);
-	//NAME = black, white, gray1, gray2, red, neon, etc. Propery in color const obj.
   const FILLS = item.fills[0];
 
   if (FILLS.type === 'SOLID') colors[NAME] = createSolidColorString(FILLS, outputFormatColors);
