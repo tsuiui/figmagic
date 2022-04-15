@@ -1,5 +1,5 @@
 import { FRAME as Frame } from '../../../contracts/Figma';
-import { FontTokens } from '../../../contracts/Tokens';
+import { FontTokens, Tokens } from '../../../contracts/Tokens';
 import { OutputFormatColors } from '../../../contracts/Config';
 import { sanitizeString } from '../../../frameworks/string/sanitizeString';
 import { createSolidColorString } from '../../../frameworks/string/createSolidColorString';
@@ -11,89 +11,92 @@ import {
 /**
  * @description Places all Figma color frames into a clean object
  */
-
-/*
-{
-  id: '3915:787',
-  name: '$headingPage',
-  type: 'TEXT',
-  blendMode: 'PASS_THROUGH',
-  absoluteBoundingBox: { x: 35, y: 987, width: 264, height: 54 },
-  constraints: { vertical: 'TOP', horizontal: 'LEFT' },
-  fills: [ { blendMode: 'NORMAL', type: 'SOLID', color: [Object] } ],
-  strokes: [],
-  strokeWeight: 1,
-  strokeAlign: 'OUTSIDE',
-  styles: { fill: '1:100', text: '2875:14' },
-  effects: [],
-  characters: 'Page heading',
-  style: {
-    fontFamily: 'Inter',											//fontFamilies
-    fontPostScriptName: null,
-    fontWeight: 400,													//fontWeights
-    textAutoResize: 'WIDTH_AND_HEIGHT',
-    fontSize: 40,															//fontSize/16 = REM size
-    textAlignHorizontal: 'LEFT',
-    textAlignVertical: 'TOP',
-    letterSpacing: 0,													//letterSpacings
-    lineHeightPx: 54,
-    lineHeightPercent: 115.19999694824219,
-    lineHeightPercentFontSize: 135,						//lineHeights*100
-    lineHeightUnit: 'FONT_SIZE_%'
-  },
-  layoutVersion: 3,
-  characterStyleOverrides: [],
-  styleOverrideTable: {},
-  lineTypes: [ 'NONE' ],
-  lineIndentations: [ 0 ]
-}
-*/
 export function makeSemanticFontTokens(
   fontFrame: Frame,
+	primitives: [],
+	outputFormatColors:OutputFormatColors,
   camelizeTokenNames?: boolean
 ): FontTokens {
 	//TODO: Throw a
   if (!fontFrame) throw Error(ErrorMakeFontTokensNoFrame);
 	if (!fontFrame.children) throw Error(ErrorMakeFontTokensNoChildren);
 
-  const colors: Record<string, unknown> = {};
+  const typography: Record<string, unknown> = {};
   const TOKENS = fontFrame.children.reverse();
 	//Only process $ prefaced items
   TOKENS.forEach((item: Frame) => {
 		if (item.name.startsWith("$")) {
-			console.log("[makeSemanticFontTokens]",item);
-			// makeSemFontToken(item, colors, outputFormatColors, 
-			// 									colorPrimitives, camelizeTokenNames);
+			makeSemFontToken(item, typography, primitives, outputFormatColors);
 		}
 	});
-  return colors;
+  return typography;
 }
 
-function makeSemFontToken(item:Frame, colors: Record<string,unknown>,
-		outputFormatColors: OutputFormatColors, 
-		colorPrimitives:any,
+function makeSemFontToken(item:Frame, typography: Record<string,unknown>,
+		primitives:[], outputFormatColors: OutputFormatColors, 
 		camelizeTokenNames?: boolean) {
 
 	function getKeyByValue(object:any, value:string):string|undefined {
 		return Object.keys(object).find(key => object[key] === value);
-	} 
+	}
+
+	function getTokenFile(name:string):any {
+		const tokenStruct:any = primitives.find((f:any)=>{
+			return f.name===name;
+		});
+		return tokenStruct;
+	}
 
 	if (!item.fills || item.fills.length === 0) return null;
-
+	//NAME is the item name. 
 	const NAME = sanitizeString(item.name, camelizeTokenNames);
+	const STYLE = item.style;
 	const FILLS = item.fills[0];
 
-	//Find the color of the item. Look up the hex in the values of the
-	//colorPrimitives const
+	const colors = getTokenFile("colors");
+	const fonts = getTokenFile("fontFamilies");
+	const weights = getTokenFile("fontWeights");
+	const sizes = getTokenFile("fontSizes");
+	const lineHeights = getTokenFile("lineHeights");
+	//Enable if we use letterSpacings
+	//const letterSpacings = getTokenFile("letterSpacings"); 
+
+	//A type style includes a number of properties that each should be referencing
+	//the appropriate primitive token.
+
+	//Get the text color
 	if (item.fills[0].type === 'SOLID') {
 		const colorVal = createSolidColorString(FILLS, outputFormatColors);
-		const collectionName = colorPrimitives.name;
-		const colorKey =  getKeyByValue(colorPrimitives.file,colorVal);
-		if (colorKey===undefined) {
-			return null;
+		let colorKey = getKeyByValue(colors.file,colorVal);
+		if (colorKey!==undefined) {
+			typography[NAME+"Color"]=`${colors.name}.${colorKey}`;
 		}
-		else {
-			colors[NAME]=`${collectionName}.${colorKey}`;
-		}
+	}
+	
+	//Create size token reference
+	//Go to REM; do not assume 16px; this needs config somewhere
+	const sizeVal = (STYLE.fontSize/16).toString()+"rem";
+	let sizeKey = getKeyByValue(sizes.file,sizeVal);
+	if (sizeKey!==undefined) {
+		typography[NAME+"Size"]=`${sizes.name}.${sizeKey}`;
+	}
+
+	//Create font family token reference
+	let fontKey = getKeyByValue(fonts.file,STYLE.fontFamily);
+	if (fontKey!==undefined) {
+		typography[NAME+"Font"]=`${fonts.name}.${fontKey}`;
+	}
+
+	//Create font weights token reference
+	let weightsKey = getKeyByValue(weights.file,STYLE.fontWeight);
+	if (weightsKey!==undefined) {
+		typography[NAME+"Weight"]=`${weights.name}.${weightsKey}`;
+	}
+
+	//Create line height token reference
+	let heightsKey = getKeyByValue(lineHeights.file,
+		(STYLE.lineHeightPercentFontSize/100).toString());
+	if (heightsKey!==undefined) {
+		typography[NAME+"LineHeight"]=`${lineHeights.name}.${heightsKey}`;
 	}
 }

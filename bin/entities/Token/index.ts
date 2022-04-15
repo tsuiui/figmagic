@@ -137,7 +137,7 @@ class Token {
         if (!config) throw Error(ErrorExtractTokensNoConfig);
         return makeSpacingTokens(frame, spacingUnit, remSize, camelizeTokenNames);
       },
-      mspacing: () => {
+      mobilespacing: () => {
         if (!config) throw Error(ErrorExtractTokensNoConfig);
         return makeSpacingTokens(frame, spacingUnit, remSize, camelizeTokenNames);
       },
@@ -206,14 +206,9 @@ class SemanticToken extends Token {
 				return makeSemanticColorTokens(frame, outputFormatColors, 
 					colorPrimitives, camelizeTokenNames);
 			},
-			//TODO: Figure out how we want to handle composite styles-to-token generation
 			semantictypography: ()=>{
-				//console.log("[tokenOperations]",this.primitives);
-				//return makeSemanticFontTokens(frame);
-				return { 
-					headingPageSize: "fontSizes.h1",
-					headingPageFace: "fontFamilies.bold"
-				}
+				return makeSemanticFontTokens(frame,this.primitives,outputFormatColors,
+																			camelizeTokenNames);
 			}
     };
     // @ts-ignore

@@ -17,8 +17,6 @@ export async function FigmagicController(config: Config, data: FigmaData): Promi
 
     if (config.syncGraphics) await createGraphics(config, data);
     if (config.syncTokens) await createTokens(config, data);
-		//when create[Primitive]Tokens resolves we do createSemanticTokens with 
-		//primitive tokens returned from createTokens
     if (config.syncElements) await createElements(config, data);
 
     console.log(MsgJobComplete);

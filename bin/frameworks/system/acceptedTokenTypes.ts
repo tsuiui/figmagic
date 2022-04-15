@@ -12,7 +12,7 @@ export const acceptedTokenTypes: string[] = [
   'letterspacings',
   'lineheights',
   'mediaqueries',
-	'mspacing',
+	'mobilespacing',
   'opacities',
   'radii',
   'shadows',
