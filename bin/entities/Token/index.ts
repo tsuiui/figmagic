@@ -24,7 +24,11 @@ import { makeSemanticColorTokens } from './logic/makeSemanticColorTokens';
 import { makeSemanticFontTokens } from './logic/makeSemanticFontTokens';
 
 import { ignoreElementsKeywords } from '../../frameworks/system/ignoreElementsKeywords';
-import { ErrorExtractTokens, ErrorExtractTokensNoConfig, ErrorMakeColorTokensNoPrimitive } from '../../frameworks/errors/errors';
+import { ErrorExtractTokens, ErrorExtractTokensNoConfig, ErrorMakeColorTokensNoPrimitive, ErrorMakeFontTokensNoFrame } from '../../frameworks/errors/errors';
+import {
+  ErrorMakeColorTokensNoFrame,
+  ErrorMakeColorTokensNoChildren
+} from '../../frameworks/errors/errors';
 
 
 export const makeToken = (token: Frame, tokenName: string, config: Config): Token => {
@@ -194,7 +198,7 @@ class SemanticToken extends Token {
     } = config;
 		
     const tokenOperations = {
-    	semanticcolors: () => {
+    	semcolors: () => {
 				//Get the color primitives object for the keys (i.e., token names) so we can
 				//check that the primitive referenced by the semantic token exists.
 				const colorPrimitives = this.primitives.find((tokenType:any)=>{
@@ -203,10 +207,33 @@ class SemanticToken extends Token {
 				if (colorPrimitives===undefined) {
 					throw Error(ErrorMakeColorTokensNoPrimitive);
 				}
-				return makeSemanticColorTokens(frame, outputFormatColors, 
-					colorPrimitives, camelizeTokenNames);
+				let colorByThemes:any = {};
+				if (!frame.children) throw Error(ErrorMakeColorTokensNoFrame);
+				let themes = frame.children.reverse();
+				themes.forEach((f:Frame)=>{
+					if (f.type==="FRAME" && f.name.startsWith("theme/")) {
+						colorByThemes[(f.name.substring(6))]=makeSemanticColorTokens(
+							f, outputFormatColors, colorPrimitives, camelizeTokenNames);
+					}
+				});
+				return colorByThemes;
 			},
-			semantictypography: ()=>{
+			semdesktoptypography: ()=>{
+				if (this.primitives===undefined) {
+					throw Error(ErrorMakeColorTokensNoPrimitive);
+				}
+				let typeByThemes:any = {};
+				if (!frame.children) throw Error(ErrorMakeFontTokensNoFrame);
+				let themes = frame.children.reverse();
+				themes.forEach((f:Frame)=>{
+					if (f.type==="FRAME" && f.name.startsWith("theme/")) {
+						typeByThemes[(f.name.substring(6))]=makeSemanticFontTokens(
+							f,this.primitives,outputFormatColors,camelizeTokenNames);
+					}
+				});
+				return typeByThemes;
+			},
+			semmobiletypography: ()=>{
 				return makeSemanticFontTokens(frame,this.primitives,outputFormatColors,
 																			camelizeTokenNames);
 			}

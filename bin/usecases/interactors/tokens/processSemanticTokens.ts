@@ -22,9 +22,12 @@ export function processSemanticTokens(tokens: Frame[], primitives:[], config: Co
 		//Even though Frame[], things like text can get in here so tokenFrame seems
 		//misleading a name. It's really every direct child in the page.
     tokens.forEach((tokenFrame) => {
+			//Reject processing things not in a frame (e.g. instructions)
+			if (tokenFrame.type!=="FRAME") return;
+
       const TOKEN_NAME = sanitizeString(tokenFrame.name);
-			//Skip all things not semantic frames.
-      if (TOKEN_NAME[0] === '_' || !TOKEN_NAME.startsWith('semantic')) {
+			//Skip all things not frames prefixed with "semantic"
+      if (TOKEN_NAME[0] === '_' || !TOKEN_NAME.startsWith('sem')) {
 					return;
 			}
       // if (acceptedTokenTypes.includes(TOKEN_NAME.toLowerCase()) && TOKEN_NAME[0] !== '_') {

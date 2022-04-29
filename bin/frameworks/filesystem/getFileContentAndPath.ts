@@ -72,7 +72,7 @@ export function getFileContentAndPath(
           return { fileContent: getTokenString(file, name, format, metadata.dataType), filePath };
 
         filePath += `.${format}`;
-				if (name.startsWith("semantic")) {
+				if (name.startsWith("sem")) {
 					return { fileContent: getSemanticTokenString(file, name, format), filePath };
 				}
 				else { //Otherwise primitive token
@@ -158,10 +158,12 @@ const getSemanticTokenString = (file: string | ProcessedToken,
 	let output:string = "";
 	let importStatements:string[]=[];
 	switch (name) {
-		case "semanticColors": 
+		case "semColors": 
 			importStatements.push("import { colors } from './colors';\n");
 			break;
-		case "semanticTypography":
+		case "semDesktopTypography":
+		case "semMobileTypography":
+		case "semTabletTypography":
 			importStatements.push("import { colors } from './colors';\n");	
 			importStatements.push("import { fontFamilies } from './fontFamilies';\n");
 			importStatements.push("import { fontSizes } from './fontSizes';\n");
@@ -173,6 +175,8 @@ const getSemanticTokenString = (file: string | ProcessedToken,
 	output+=`// ${MsgGeneratedFileWarning}\n\n`;
 	importStatements.forEach((statement)=>output+=statement);
 	//let jsonObj:string = JSON.stringify(file,null,' ');
+	//Stackoverflow mentions utill is a debugging lib and the output string may be
+	//subject to change.
 	let jsonObj:string = util.inspect(file);
 
 	//Strip surrounding quotes from property values to arrive at variable

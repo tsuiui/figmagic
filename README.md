@@ -1,5 +1,11 @@
 ![Figmagic cover art](images/cover.png)
 
+# Doma Semantic Tokens Addition
+*tsuiui/figmagic:main* - Fork from mikaelvesavuori/figmagic:main to add semantic color and typography frames for Bungalow design system as well as TS export tweaks for Doma.
+
+*tsuiui/figmagic:sem-group-by-theme* - Branched from tsuiui/figmagic:main to group semantic tokens by theme.
+
+
 # Figmagic
 
 ![Build Status](https://github.com/mikaelvesavuori/figmagic/workflows/master/badge.svg)
