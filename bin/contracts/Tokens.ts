@@ -1,4 +1,5 @@
 export type Tokens = Record<string, unknown>;
+//export type MUIToken = Tokens|{ main: string, light: string, dark: string, contrastText: string };
 
 export type BorderWidthTokens = Tokens;
 export type ColorTokens = Tokens;

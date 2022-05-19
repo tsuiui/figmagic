@@ -72,7 +72,7 @@ export function getFileContentAndPath(
           return { fileContent: getTokenString(file, name, format, metadata.dataType), filePath };
 
         filePath += `.${format}`;
-				if (name.startsWith("sem")) {
+				if (name.startsWith("semantic")) {
 					return { fileContent: getSemanticTokenString(file, name, format), filePath };
 				}
 				else { //Otherwise primitive token
@@ -158,12 +158,12 @@ const getSemanticTokenString = (file: string | ProcessedToken,
 	let output:string = "";
 	let importStatements:string[]=[];
 	switch (name) {
-		case "semColors": 
+		case "semanticColors": 
 			importStatements.push("import { colors } from './colors';\n");
 			break;
-		case "semDesktopTypography":
-		case "semMobileTypography":
-		case "semTabletTypography":
+		case "semanticDesktopTypography":
+		case "semanticMobileTypography":
+		case "semanticTabletTypography":
 			importStatements.push("import { colors } from './colors';\n");	
 			importStatements.push("import { fontFamilies } from './fontFamilies';\n");
 			importStatements.push("import { fontSizes } from './fontSizes';\n");
