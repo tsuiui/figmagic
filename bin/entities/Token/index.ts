@@ -198,7 +198,7 @@ class SemanticToken extends Token {
     } = config;
 		
     const tokenOperations = {
-    	semcolors: () => {
+    	semanticcolors: () => {
 				//Get the color primitives object for the keys (i.e., token names) so we can
 				//check that the primitive referenced by the semantic token exists.
 				const colorPrimitives = this.primitives.find((tokenType:any)=>{
@@ -218,7 +218,7 @@ class SemanticToken extends Token {
 				});
 				return colorByThemes;
 			},
-			semdesktoptypography: ()=>{
+			semanticdesktoptypography: ()=>{
 				if (this.primitives===undefined) {
 					throw Error(ErrorMakeColorTokensNoPrimitive);
 				}
@@ -233,7 +233,7 @@ class SemanticToken extends Token {
 				});
 				return typeByThemes;
 			},
-			semmobiletypography: ()=>{
+			semanticmobiletypography: ()=>{
 				return makeSemanticFontTokens(frame,this.primitives,outputFormatColors,
 																			camelizeTokenNames);
 			}

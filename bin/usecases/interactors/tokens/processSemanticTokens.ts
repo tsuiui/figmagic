@@ -27,7 +27,11 @@ export function processSemanticTokens(tokens: Frame[], primitives:[], config: Co
 
       const TOKEN_NAME = sanitizeString(tokenFrame.name);
 			//Skip all things not frames prefixed with "semantic"
-      if (TOKEN_NAME[0] === '_' || !TOKEN_NAME.startsWith('sem')) {
+			//Makes sure to change the condition in getFileContentAndPath and index
+			//tokenOperations as well if changing the startsWith string here. Refactor
+			//this cludgines as it leads to a lot of issues if the semantic frames 
+			//need renaming.
+      if (TOKEN_NAME[0] === '_' || !TOKEN_NAME.startsWith('semantic')) {
 					return;
 			}
       // if (acceptedTokenTypes.includes(TOKEN_NAME.toLowerCase()) && TOKEN_NAME[0] !== '_') {
