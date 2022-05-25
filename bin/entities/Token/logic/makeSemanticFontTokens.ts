@@ -17,7 +17,6 @@ export function makeSemanticFontTokens(
 	outputFormatColors:OutputFormatColors,
   camelizeTokenNames?: boolean
 ): FontTokens {
-	//TODO: Throw a
   if (!fontFrame) throw Error(ErrorMakeFontTokensNoFrame);
 	if (!fontFrame.children) throw Error(ErrorMakeFontTokensNoChildren);
 
@@ -51,9 +50,6 @@ function makeSemFontToken(item:Frame, typography: Record<string,unknown>,
 	//NAME is the item name. 
 	const NAME = sanitizeString(item.name, camelizeTokenNames);
 	const STYLE = item.style;
-	const FILLS = item.fills[0];
-
-	const colors = getTokenFile("colors");
 	const fonts = getTokenFile("fontFamilies");
 	const weights = getTokenFile("fontWeights");
 	const sizes = getTokenFile("fontSizes");
@@ -63,15 +59,6 @@ function makeSemFontToken(item:Frame, typography: Record<string,unknown>,
 
 	//A type style includes a number of properties that each should be referencing
 	//the appropriate primitive token.
-
-	//Get the text color
-	if (item.fills[0].type === 'SOLID') {
-		const colorVal = createSolidColorString(FILLS, outputFormatColors);
-		let colorKey = getKeyByValue(colors.file,colorVal);
-		if (colorKey!==undefined) {
-			typography[NAME+"Color"]=`${colors.name}.${colorKey}`;
-		}
-	}
 	
 	//Create size token reference
 	//Go to REM; do not assume 16px; this needs config somewhere
