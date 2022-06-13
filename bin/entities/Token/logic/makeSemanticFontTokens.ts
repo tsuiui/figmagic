@@ -81,8 +81,10 @@ function makeSemFontToken(item:Frame, typography: Record<string,unknown>,
 	}
 
 	//Create line height token reference
+	//lineHeightPercentFontSize can have very minor precision differences that
+	//prevent a successful lookup so get the number to a fixed length. 
 	let heightsKey = getKeyByValue(lineHeights.file,
-		(STYLE.lineHeightPercentFontSize/100).toString());
+		(STYLE.lineHeightPercentFontSize/100).toPrecision(3).toString());
 	if (heightsKey!==undefined) {
 		typography[NAME+"LineHeight"]=`${lineHeights.name}.${heightsKey}`;
 	}
